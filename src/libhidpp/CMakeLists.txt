@@ -66,13 +66,20 @@ if("${HID_BACKEND}" STREQUAL "windows")
 		hid/windows/error_category.cpp
 		hid/windows/DeviceData.cpp
 	)
+elseif("${HID_BACKEND}" STREQUAL "macos")
+	set(LIBHIDPP_SOURCES ${LIBHIDPP_SOURCES}
+		hid/macos/Utility_macos.cpp
+	)
 endif()
 
+# include_directories(.)
+# add_library(hidpp SHARED ${LIBHIDPP_SOURCES})
 add_library(hidpp ${LIBHIDPP_SOURCES})
 set_target_properties(hidpp PROPERTIES VERSION 0.2)
 target_include_directories(hidpp PUBLIC
 	$<INSTALL_INTERFACE:include/hidpp>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+
 if("${HID_BACKEND}" STREQUAL "linux")
 	target_include_directories(hidpp PRIVATE ${LIBUDEV_INCLUDE_DIRECTORIES})
 	target_link_libraries(hidpp ${LIBUDEV_LIBRARIES})
@@ -82,6 +89,11 @@ elseif("${HID_BACKEND}" STREQUAL "windows")
 		-D_WIN32_WINNT=0x0600 # Use vista or later
 	)
 	target_link_libraries(hidpp setupapi hid cfgmgr32)
+elseif("${HID_BACKEND}" STREQUAL "macos")
+	target_link_libraries(hidpp stdc++ "-framework IOKit" "-framework CoreFoundation" objc)
+	# 	^ Src: https://stackoverflow.com/a/25286420/10601702
+	#		The approach using find_library() didn't work
+	# set(CMAKE_OSX_ARCHITECTURES arm64;x86_64)
 endif()
 
 install(DIRECTORY "./" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/hidpp"

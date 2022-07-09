@@ -12,17 +12,30 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	set(DEFAULT_HID_BACKEND "linux")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(DEFAULT_HID_BACKEND "windows")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	set(DEFAULT_HID_BACKEND "macos")
 else()
 	message(WARNING "System is not supported")
 endif()
 set(HID_BACKEND "${DEFAULT_HID_BACKEND}" CACHE STRING "Backend used for accessing HID devices")
-set_property(CACHE HID_BACKEND PROPERTY STRINGS linux windows)
+set_property(CACHE HID_BACKEND PROPERTY STRINGS linux windows macos)
 
 find_package(Threads REQUIRED)
 if("${HID_BACKEND}" STREQUAL "linux")
 	find_package(PkgConfig REQUIRED)
 	pkg_check_modules(LIBUDEV libudev REQUIRED)
 elseif("${HID_BACKEND}" STREQUAL "windows")
+	# add_definitions(-DUNICODE -D_UNICODE)
+	# add_definitions(-D_WIN32_WINNT=0x0600) # Use vista or later
+elseif("${HID_BACKEND}" STREQUAL "macos")
+	set(CMAKE_MACOSX_RPATH ON) # Suppress warning I don't understand
+	include_directories(/usr/local/include) 
+	# 	^ Prevent `fatal error: 'tinyxml2.h' file not found`
+	# 		Src: https://gitlab.kitware.com/cmake/cmake/-/issues/19120
+	link_directories(${TINYXML2_LIBRARY_DIRS}) 
+	# 	^ Prevent `ld: library not found for -ltinyxml2`
+	#		Src: https://stackoverflow.com/q/60362476/10601702
+	# set(CMAKE_OSX_ARCHITECTURES arm64;x86_64)
 else()
 	message(FATAL_ERROR "HID_BACKEND is invalid.")
 endif()
