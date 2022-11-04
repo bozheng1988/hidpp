@@ -52,11 +52,15 @@ namespace HIDPP
 class Report
 {
 	static constexpr std::size_t HeaderLength = 4;
+	static constexpr std::size_t DJHeaderLength = 3;
+
 public:
 	enum Type: uint8_t {
 		Short = 0x10,
 		Long = 0x11,
 		VeryLong = 0x12,
+		ShortDJ = 0x20, ///< Short DJ reports use 12 byte parameters.
+		LongDJ = 0x21,  ///< Long DJ reports use 29 byte parameters
 	};
 
 	static inline constexpr std::size_t reportLength (Type type) noexcept {
@@ -64,12 +68,20 @@ public:
 		case Type::Short: return 7;
 		case Type::Long: return 20;
 		case Type::VeryLong: return 64;
+		case Type::ShortDJ: return 12;
+		case Type::LongDJ: return 32;
 		default: return 0;
 		}
 	}
 
 	inline static constexpr std::size_t parameterLength (Type type) noexcept {
-		return reportLength (type) - HeaderLength;
+		switch (type) {
+		case Type::ShortDJ:
+		case Type::LongDJ:
+			return reportLength (type) - DJHeaderLength;
+		default:
+			return reportLength (type) - HeaderLength;
+		}
 	}
 
 	/**
@@ -298,4 +310,3 @@ inline constexpr auto VeryLongParamLength = Report::parameterLength (Report::Ver
 }
 
 #endif
-

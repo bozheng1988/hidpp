@@ -50,6 +50,7 @@ static constexpr unsigned int DeviceIndex = 1;
 static constexpr unsigned int SubID = 2;
 static constexpr unsigned int Address = 3;
 static constexpr unsigned int Parameters = 4;
+static constexpr unsigned int DJParameters = 3;
 }
 
 Report::Report (uint8_t report_id, const uint8_t *data, std::size_t length)
@@ -94,7 +95,7 @@ Report::Report (HIDPP::DeviceIndex device_index,
 		std::vector<uint8_t>::const_iterator param_end)
 {
 	std::size_t param_len = std::distance (param_begin, param_end);
-	for (auto type: { Short, Long, VeryLong }) {
+	for (auto type: { Short, Long, VeryLong, ShortDJ, LongDJ }) {
 		if (param_len == parameterLength (type)) {
 			_data.resize (reportLength (type));
 			_data[Offset::Type] = type;
@@ -130,7 +131,7 @@ Report::Report (DeviceIndex device_index,
 		std::vector<uint8_t>::const_iterator param_end)
 {
 	std::size_t param_len = std::distance (param_begin, param_end);
-	for (auto type: { Short, Long, VeryLong }) {
+	for (auto type: { Short, Long, VeryLong, ShortDJ, LongDJ }) {
 		if (param_len == parameterLength (type)) {
 			_data.resize (reportLength (type));
 			_data[Offset::Type] = type;
@@ -280,4 +281,3 @@ bool Report::checkErrorMessage20 (uint8_t *feature_index,
 
 	return true;
 }
-
