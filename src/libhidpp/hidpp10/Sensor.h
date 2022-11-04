@@ -27,6 +27,8 @@ namespace HIDPP10
 class Sensor
 {
 public:
+	virtual ~Sensor() = default;
+
 	virtual unsigned int fromDPI (unsigned int dpi) const = 0;
 	virtual unsigned int toDPI (unsigned int internal_value) const = 0;
 
@@ -86,4 +88,3 @@ private:
 }
 
 #endif
-
